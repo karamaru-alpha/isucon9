@@ -40,7 +40,6 @@ restart:
 
 .PHONY: before-bench
 before-bench:
-	git pull
 	$(eval when := $(shell date "+%s"))
 	mkdir -p ~/logs/$(when)
 	@if [ -f $(NGX_LOG) ]; then \
