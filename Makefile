@@ -4,10 +4,15 @@ DB_PORT:=3306
 DB_USER:=isucari
 DB_PASS:=isucari
 DB_NAME:=isucari
+MYSQL_CMD:=mysql -h$(DB_HOST) -P$(DB_PORT) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME)
 
-NGX_LOG:=/var/log/nginx/access.log
+NGX_LOG:=/tmp/access.log
 MYSQL_LOG:=/tmp/slow-query.log
 
+
+#--------------------
+# 事前準備
+#--------------------
 
 .PHONY: setup
 setup:
@@ -23,6 +28,10 @@ setup:
 	sudo rm kataribe.zip
 	kataribe -generate
 
+
+#--------------------
+# ベンチマーカー周り
+#--------------------
 
 .PHONY: restart
 restart:
@@ -46,10 +55,21 @@ before-bench:
 	sudo systemctl restart mysql
 
 
+#--------------------
+# mysql周り
+#--------------------
+
+.PHONY: slow-on
+slow-on:
+	sudo mysql -e "set global slow_query_log_file = '$(MYSQL_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
+# sudo $(MYSQL_CMD) -e "set global slow_query_log_file = '$(MYSQL_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
+
+.PHONY: slow-off
+slow-off:
+	sudo mysql -e "set global slow_query_log = OFF;"
+# sudo $(MYSQL_CMD) -e "set global slow_query_log = OFF;"
+
+
 .PHONY: kataru
 kataru:
 	sudo cat $(NGX_LOG) | kataribe -f ./kataribe.toml
-
-.PHONY: sql
-sql:
-	mysql -h$(DB_HOST) -P$(DB_PORT) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME)
