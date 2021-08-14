@@ -62,6 +62,7 @@ before-bench:
 slow:
 	sudo pt-query-digest $(MYSQL_LOG)
 
+# 再起動すると設定リセットされるので注意
 .PHONY: slow-on
 slow-on:
 	sudo mysql -e "set global slow_query_log_file = '$(MYSQL_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
