@@ -52,6 +52,7 @@ before-bench:
 #	sudo cp my.cnf /etc/mysql/my.cnf
 	sudo systemctl restart nginx
 	sudo systemctl restart mysql
+	echo "slowログ出すならmake slow-onしてね"
 
 
 #--------------------
