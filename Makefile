@@ -58,6 +58,10 @@ before-bench:
 # mysql周り
 #--------------------
 
+.PHONY: slow
+slow:
+	sudo pt-query-digest $(MYSQL_LOG)
+
 .PHONY: slow-on
 slow-on:
 	sudo mysql -e "set global slow_query_log_file = '$(MYSQL_LOG)'; set global long_query_time = 0; set global slow_query_log = ON;"
@@ -68,6 +72,10 @@ slow-off:
 	sudo mysql -e "set global slow_query_log = OFF;"
 # sudo $(MYSQL_CMD) -e "set global slow_query_log = OFF;"
 
+
+#--------------------
+# accesslog周り
+#--------------------
 
 .PHONY: kataru
 kataru:
