@@ -4,7 +4,6 @@ DB_PORT:=3306
 DB_USER:=isucari
 DB_PASS:=isucari
 DB_NAME:=isucari
-MYSQL_CMD:=mysql -h$(DB_HOST) -P$(DB_PORT) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME)
 
 NGX_LOG:=/var/log/nginx/access.log
 MYSQL_LOG:=/tmp/slow-query.log
@@ -51,3 +50,6 @@ before-bench:
 kataru:
 	sudo cat $(NGX_LOG) | kataribe -f ./kataribe.toml
 
+.PHONY: sql
+sql:
+	mysql -h$(DB_HOST) -P$(DB_PORT) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME)
