@@ -706,13 +706,39 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	sellerIDUnique := make(map[int64]struct{})
+	sellerIDs := make([]int64, 0, len(items))
+	for _, v := range items {
+		if _, ok := sellerIDUnique[v.SellerID]; !ok {
+			sellerIDUnique[v.SellerID] = struct{}{}
+			sellerIDs = append(sellerIDs, v.SellerID)
+		}
+	}
+
+	var tmpUsers []User
+	if err = dbx.Select(&tmpUsers, `SELECT * from users WHERE id IN (?)`, sellerIDs); err != nil {
+		log.Print(err)
+		outputErrorMsg(w, http.StatusInternalServerError, "db error")
+		return
+	}
+
+	sellers := make(map[int64]UserSimple, len(sellerIDUnique))
+	for _, v := range tmpUsers {
+		sellers[v.ID] = UserSimple{
+			ID:           v.ID,
+			AccountName:  v.AccountName,
+			NumSellItems: v.NumSellItems,
+		}
+	}
+
 	itemSimples := []ItemSimple{}
 	for _, item := range items {
-		seller, err := getUserSimpleByID(dbx, item.SellerID)
-		if err != nil {
-			outputErrorMsg(w, http.StatusNotFound, "seller not found")
-			return
-		}
+		// seller, err := getUserSimpleByID(dbx, item.SellerID)
+		// if err != nil {
+		// 	outputErrorMsg(w, http.StatusNotFound, "seller not found")
+		// 	return
+		// }
+		seller := sellers[item.SellerID]
 		category, err := getCategoryByID(dbx, item.CategoryID)
 		if err != nil {
 			outputErrorMsg(w, http.StatusNotFound, "category not found")
