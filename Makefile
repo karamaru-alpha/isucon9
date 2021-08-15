@@ -45,6 +45,7 @@ before-bench:
 	fi
 #	sudo cp nginx.conf /etc/nginx/nginx.conf
 #	sudo cp my.cnf /etc/mysql/my.cnf
+	(cd go && make)
 	sudo systemctl restart nginx
 	sudo systemctl restart mysql
 	sudo systemctl restart isucari.golang.service
