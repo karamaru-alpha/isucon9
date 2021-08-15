@@ -707,7 +707,7 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sellerIDUnique := make(map[int64]struct{})
-	sellerIDs := make([]interface{}, 0, len(items))
+	sellerIDs := make([]int64, 0, len(items))
 	for _, v := range items {
 		if _, ok := sellerIDUnique[v.SellerID]; !ok {
 			sellerIDUnique[v.SellerID] = struct{}{}
@@ -715,8 +715,15 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	inQuery, inArgs, err = sqlx.In(`SELECT * from users WHERE id IN (?)`, sellerIDs)
+	if err != nil {
+		log.Print(err)
+		outputErrorMsg(w, http.StatusInternalServerError, "db error")
+		return
+	}
 	var tmpUsers []User
-	if err = dbx.Select(&tmpUsers, `SELECT * from users WHERE id IN (?)`, sellerIDs); err != nil {
+	err = dbx.Select(&tmpUsers, inQuery, inArgs...)
+	if err != nil {
 		log.Print(err)
 		outputErrorMsg(w, http.StatusInternalServerError, "db error")
 		return
