@@ -707,7 +707,7 @@ func getNewCategoryItems(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sellerIDUnique := make(map[int64]struct{})
-	sellerIDs := make([]int64, 0, len(items))
+	sellerIDs := make([]interface{}, 0, len(items))
 	for _, v := range items {
 		if _, ok := sellerIDUnique[v.SellerID]; !ok {
 			sellerIDUnique[v.SellerID] = struct{}{}
