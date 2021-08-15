@@ -147,7 +147,8 @@ type TransactionEvidence struct {
 	CreatedAt          time.Time `json:"-" db:"created_at"`
 	UpdatedAt          time.Time `json:"-" db:"updated_at"`
 
-	ReserveID string `json:"-" db:"reserve_id"` // shipping table
+	ReserveID  string `json:"-" db:"reserve_id"`  // shipping table
+	ShipStatus string `json:"-" db:"ship_status"` // shipping table
 }
 
 type Shipping struct {
@@ -1052,7 +1053,8 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 			te.id,
 			te.item_id,
 			te.status,
-			s.reserve_id
+			s.reserve_id,
+			s.status as ship_status
 		from transaction_evidences te
 		LEFT JOIN shippings s ON te.id = s.transaction_evidence_id
 		WHERE te.item_id IN (?)
@@ -1146,19 +1148,19 @@ func getTransactions(w http.ResponseWriter, r *http.Request) {
 			// 	tx.Rollback()
 			// 	return
 			// }
-			ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
-				ReserveID: transactionEvidence.ReserveID,
-			})
-			if err != nil {
-				log.Print(err)
-				outputErrorMsg(w, http.StatusInternalServerError, "failed to request to shipment service")
-				tx.Rollback()
-				return
-			}
+			// ssr, err := APIShipmentStatus(getShipmentServiceURL(), &APIShipmentStatusReq{
+			// 	ReserveID: transactionEvidence.ReserveID,
+			// })
+			// if err != nil {
+			// 	log.Print(err)
+			// 	outputErrorMsg(w, http.StatusInternalServerError, "failed to request to shipment service")
+			// 	tx.Rollback()
+			// 	return
+			// }
 
 			itemDetail.TransactionEvidenceID = transactionEvidence.ID
 			itemDetail.TransactionEvidenceStatus = transactionEvidence.Status
-			itemDetail.ShippingStatus = ssr.Status
+			itemDetail.ShippingStatus = transactionEvidence.ShipStatus
 		}
 
 		itemDetails = append(itemDetails, itemDetail)
