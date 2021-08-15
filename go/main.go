@@ -269,6 +269,10 @@ type resSetting struct {
 }
 
 var (
+	omConfig = map[string]string{
+		"payment_service_URL":  DefaultPaymentServiceURL,
+		"shipment_service_URL": DefaultShipmentServiceURL,
+	}
 	omCategory = map[int]Category{}
 )
 
@@ -424,16 +428,17 @@ func getCategoryByID(q sqlx.Queryer, categoryID int) (category Category, err err
 }
 
 func getConfigByName(name string) (string, error) {
-	config := Config{}
-	err := dbx.Get(&config, "SELECT * FROM `configs` WHERE `name` = ?", name)
-	if err == sql.ErrNoRows {
-		return "", nil
-	}
-	if err != nil {
-		log.Print(err)
-		return "", err
-	}
-	return config.Val, err
+	// config := Config{}
+	// err := dbx.Get(&config, "SELECT * FROM `configs` WHERE `name` = ?", name)
+	// if err == sql.ErrNoRows {
+	// 	return "", nil
+	// }
+	// if err != nil {
+	// 	log.Print(err)
+	// 	return "", err
+	// }
+	// return config.Val, err
+	return omConfig[name], nil
 }
 
 func getPaymentServiceURL() string {
@@ -474,26 +479,29 @@ func postInitialize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = dbx.Exec(
-		"INSERT INTO `configs` (`name`, `val`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `val` = VALUES(`val`)",
-		"payment_service_url",
-		ri.PaymentServiceURL,
-	)
-	if err != nil {
-		log.Print(err)
-		outputErrorMsg(w, http.StatusInternalServerError, "db error")
-		return
-	}
-	_, err = dbx.Exec(
-		"INSERT INTO `configs` (`name`, `val`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `val` = VALUES(`val`)",
-		"shipment_service_url",
-		ri.ShipmentServiceURL,
-	)
-	if err != nil {
-		log.Print(err)
-		outputErrorMsg(w, http.StatusInternalServerError, "db error")
-		return
-	}
+	// _, err = dbx.Exec(
+	// 	"INSERT INTO `configs` (`name`, `val`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `val` = VALUES(`val`)",
+	// 	"payment_service_url",
+	// 	ri.PaymentServiceURL,
+	// )
+	// if err != nil {
+	// 	log.Print(err)
+	// 	outputErrorMsg(w, http.StatusInternalServerError, "db error")
+	// 	return
+	// }
+	// _, err = dbx.Exec(
+	// 	"INSERT INTO `configs` (`name`, `val`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `val` = VALUES(`val`)",
+	// 	"shipment_service_url",
+	// 	ri.ShipmentServiceURL,
+	// )
+	// if err != nil {
+	// 	log.Print(err)
+	// 	outputErrorMsg(w, http.StatusInternalServerError, "db error")
+	// 	return
+	// }
+
+	omConfig["payment_service_URL"] = ri.PaymentServiceURL
+	omConfig["shipment_service_URL"] = ri.ShipmentServiceURL
 
 	categories := []Category{}
 	if err := dbx.Select(&categories, "SELECT * FROM `categories`"); err != nil {
