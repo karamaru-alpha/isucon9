@@ -33,11 +33,6 @@ setup:
 # ベンチマーカー周り
 #--------------------
 
-.PHONY: restart
-restart:
-	sudo systemctl restart nginx
-	sudo systemctl restart isucari.golang.service
-
 .PHONY: before-bench
 before-bench:
 	$(eval when := $(shell date "+%s"))
@@ -52,6 +47,7 @@ before-bench:
 #	sudo cp my.cnf /etc/mysql/my.cnf
 	sudo systemctl restart nginx
 	sudo systemctl restart mysql
+	sudo systemctl restart isucari.golang.service
 	echo "slowログ出すならmake slow-onしてね"
 
 
