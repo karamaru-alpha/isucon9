@@ -59,6 +59,10 @@ before-bench:
 # mysql周り
 #--------------------
 
+.PHONY: sql
+sql:
+	mysql -h$(DB_HOST) -P$(DB_PORT) -u$(DB_USER) -p$(DB_PASS) $(DB_NAME)
+
 .PHONY: slow
 slow:
 	sudo pt-query-digest $(MYSQL_LOG)
